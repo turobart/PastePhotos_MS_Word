@@ -1,0 +1,69 @@
+Sub PastePhotos()
+    Dim doc As Word.Document
+    Dim fd As FileDialog
+    Dim vItem As Variant
+    Dim mg1 As Range
+    Dim mg2 As Range
+    Dim sNoDoc As String
+    
+    Dim iRow As Integer
+    Dim iCol As Integer
+    Dim i As Long
+    
+    Dim oTable As Table
+    Dim oCell As Cell
+    Dim oPrevRow As Row, oNewRow As Row
+    Dim iColumn As Long
+    
+    Dim rngFormat As Range
+
+    Set fd = Application.FileDialog(msoFileDialogFilePicker)
+    Set doc = ActiveDocument
+
+ Set fd = Application.FileDialog(msoFileDialogFilePicker)
+ With fd
+ .Title = "Select image files and click OK"
+ .Filters.Add "Images", "*.gif; *.jpg; *.jpeg; *.bmp; *.tif; *.png; *.wmf"
+ .FilterIndex = 2
+ If .Show = -1 Then
+            
+            For i = 1 To .SelectedItems.Count
+
+            iCol = 1
+            iRow = i
+                                
+                Set oTable = ActiveDocument.Tables(1)
+                Set oPrevRow = oTable.Rows(oTable.Rows.Count)
+                
+                Set mg2 = ActiveDocument.Tables(1).Cell(iRow, iCol).Range
+                
+                oPrevRow.Cells(1).Range.InsertParagraph
+                oPrevRow.Cells(1).Range.ParagraphFormat.Alignment = wdAlignParagraphCenter
+                
+                mg2.InlineShapes.AddPicture FileName:= _
+                .SelectedItems(i), LinkToFile:=False, _
+                SaveWithDocument:=True, Range:=mg2
+                
+                Set oNewRow = oTable.Rows(oTable.Rows.Count)
+                
+                Set mg1 = ActiveDocument.Tables(1).Cell(iRow, iCol).Range
+                oTable.Rows.Add
+                Set oNewRow = oTable.Rows(oTable.Rows.Count)
+
+               ' oNewRow.Cells(1).Range.Text = "Caption" & vbCrLf & vbCrLf
+                
+                With mg1
+                .InsertAfter Text:="Caption" & vbCrLf & vbCrLf
+                 With .Paragraphs(2)
+                .Alignment = wdAlignParagraphRight
+                End With
+                End With
+              
+                If i < .SelectedItems.Count And i Mod 2 = 0 Then 'add another row, more to go
+                End If
+        Next i
+        End If
+    End With
+
+    Set fd = Nothing
+End Sub
